@@ -7,15 +7,15 @@ std_msgs::UInt16MultiArray servo;
 void joy_callback(const sensor_msgs::Joy &joy_msg)
 {
   // 処理内容を記述
-  // 5 gas, 2 brake, 0 steering
-  servo.data[0] = ((joy_msg.axes[0]*180)+180)/2;
-  servo.data[1] = ((joy_msg.axes[3]*180)+180)/2;
+  // joy_msg.axes[5]=gas, joy_msg.axes[2]=brake, joy_msg.axis[0]=steering
+  servo.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
   float gas = joy_msg.axes[5]+93;
   float brake = (joy_msg.axes[2]*21*(-1)+207)/2;
   int throttle = int((gas+brake)/2);
+  servo.data[1] = throttle;
   //ROS_INFO("steering:%d",steering);   // スティック0の状態を表示 (-1 ～ 1)
   ROS_INFO("steering:%d",servo.data[0]);  // ボタン0の状態を表示 (0 or 1)
-  ROS_INFO("LED:%d", servo.data[1]);
+  ROS_INFO("throttle:%d", servo.data[1]);
 }
 
 int main(int argc, char **argv)
