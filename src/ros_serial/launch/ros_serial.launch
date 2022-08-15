@@ -1,0 +1,4 @@
+<launch>
+  <node name="joy_node" pkg="joy" type="joy_node" />
+  <node name="ros_serial" pkg="ros_serial" type="ros_serial" output="screen" />
+</launch>
