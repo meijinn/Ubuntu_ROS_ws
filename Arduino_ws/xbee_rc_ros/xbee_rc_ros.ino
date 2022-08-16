@@ -8,7 +8,7 @@ Servo speedcontroller;
 
 int TRIG = 3;
 int ECHO = 2;
-const int BRAKE = 93;
+//const int BRAKE = 93;
 
 
 double duration = 0;
@@ -23,7 +23,7 @@ void servoCb( const std_msgs::UInt16MultiArray& cmd_msg) {
   float dist = getRange_Ultrasound();
   
   if(dist < 20){
-    cmd_msg.data[1] = BRAKE;
+    cmd_msg.data[1] += 2;
   }
   speedcontroller.write(cmd_msg.data[1]); 
 }
