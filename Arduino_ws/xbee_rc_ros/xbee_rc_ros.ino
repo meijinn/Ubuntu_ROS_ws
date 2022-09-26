@@ -22,7 +22,7 @@ void servoCb( const std_msgs::UInt16MultiArray& cmd_msg) {
   
   float dist = getRange_Ultrasound();
   
-  if(dist < 20){
+  if(dist < 30){
     cmd_msg.data[1] += 2;
   }
   speedcontroller.write(cmd_msg.data[1]); 
