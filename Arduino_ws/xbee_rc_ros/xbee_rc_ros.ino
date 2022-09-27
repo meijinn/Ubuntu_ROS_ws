@@ -18,13 +18,18 @@ double speed_of_sound = 331.5 + 0.6 * 25; // 25℃の気温の想定
 ros::NodeHandle nh;
 
 void servoCb( const std_msgs::UInt8MultiArray& cmd_msg) {
-  servo.write(cmd_msg.data[0]);
+
+  if(cmd_msg.data[1] == 0 && cmd_msg.data[0] == 0){
+    cmd_msg.data[0] = 90;
+    cmd_msg.data[1] = 93;
+  }
   
   float dist = getRange_Ultrasound();
-  
   if(dist < 30){
     cmd_msg.data[1] += 2;
   }
+  
+  servo.write(cmd_msg.data[0]);
   speedcontroller.write(cmd_msg.data[1]); 
 }
 
