@@ -1,7 +1,7 @@
 
 #include <Servo.h>
 #include <ros.h>
-#include <std_msgs/UInt16MultiArray.h>
+#include <std_msgs/UInt8MultiArray.h>
 
 Servo servo;
 Servo speedcontroller;
@@ -17,7 +17,7 @@ double speed_of_sound = 331.5 + 0.6 * 25; // 25℃の気温の想定
 
 ros::NodeHandle nh;
 
-void servoCb( const std_msgs::UInt16MultiArray& cmd_msg) {
+void servoCb( const std_msgs::UInt8MultiArray& cmd_msg) {
   servo.write(cmd_msg.data[0]);
   
   float dist = getRange_Ultrasound();
@@ -28,7 +28,7 @@ void servoCb( const std_msgs::UInt16MultiArray& cmd_msg) {
   speedcontroller.write(cmd_msg.data[1]); 
 }
 
-ros::Subscriber<std_msgs::UInt16MultiArray> sub("servo", servoCb);
+ros::Subscriber<std_msgs::UInt8MultiArray> sub("servo", servoCb);
 
 float getRange_Ultrasound()
 {
