@@ -9,11 +9,17 @@ void joy_callback(const sensor_msgs::Joy &joy_msg)
   // 処理内容を記述
   // joy_msg.axes[5]=gas, joy_msg.axes[2]=brake, joy_msg.axis[0]=steering
   controller.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
-  float gas = joy_msg.axes[5]+93;//low
-  //float gas = 2*joy_msg.axes[5]+94;//second
+  //float gas = joy_msg.axes[5]+93;//low
+  //float gas = (joy_msg.axes[5]*3+183)/2;//second
+  //float gas = joy_msg.axes[5]*3+92;//third
+  //float gas = (joy_msg.axes[5]*7+183)/2;//top
+  float gas = (joy_msg.axes[5]*11+183)/2;//overtop
   //float brake = (joy_msg.axes[2]*21*(-1)+207)/2; //default
-  float brake = joy_msg.axes[2]*(-10)+103;//low
-  //float brake = joy_msg.axes[2]*(-11)+101;//second
+  //float brake = joy_msg.axes[2]*(-10)+103;//low
+  //float brake = joy_msg.axes[2]*(-10)+103;//second
+  //float brake = (joy_msg.axes[2]*(-21)+203)/2;//third
+  //float brake = joy_msg.axes[2]*(-11)+102;//top
+  float brake = joy_msg.axes[2]*(-11)+101;//overtop
 
   int throttle = int((gas+brake)/2);
   controller.data[1] = throttle;
