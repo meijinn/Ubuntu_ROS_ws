@@ -9,8 +9,12 @@ void joy_callback(const sensor_msgs::Joy &joy_msg)
   // 処理内容を記述
   // joy_msg.axes[5]=gas, joy_msg.axes[2]=brake, joy_msg.axis[0]=steering
   controller.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
-  float gas = joy_msg.axes[5]+93;
-  float brake = (joy_msg.axes[2]*21*(-1)+207)/2;
+  float gas = joy_msg.axes[5]+93;//low
+  //float gas = 2*joy_msg.axes[5]+94;//second
+  //float brake = (joy_msg.axes[2]*21*(-1)+207)/2; //default
+  float brake = joy_msg.axes[2]*(-10)+103;//low
+  //float brake = joy_msg.axes[2]*(-11)+101;//second
+
   int throttle = int((gas+brake)/2);
   controller.data[1] = throttle;
   //ROS_INFO("steering:%d",steering);   // スティック0の状態を表示 (-1 ～ 1)
