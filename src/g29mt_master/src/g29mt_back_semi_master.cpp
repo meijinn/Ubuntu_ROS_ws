@@ -12,10 +12,12 @@ int last_shift_state = 0;
 bool clutch = false;
 char hantei[10];
 
-int m,n,l,a,b,c = 0;
+int m,n,l,k = 0;
+int i,j = 0;
 
 void joy_callback(const sensor_msgs::Joy &joy_msg){
 
+  int throttle = 93;
   // 処理内容を記述 踏むと1になるからps3に-1をかける
   //shift_count = shift_count + joy_msg.buttons[4] - joy_msg.buttons[5];
   if(joy_msg.axes[1] > 0 && joy_msg.axes[1] < 0.5){
@@ -71,39 +73,38 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
   switch (shift_count)
   {
   case 0:
-    m = 0; n = 0; l = 0;
-    a = 0; b = 0; c = 0;
+    m = 0; n = 0; l = 0; k = 5; i = 5;
     break;
   case 1:
-    m = -1; n = 93; l = 1;
-    a = 10; b = 103; c = 1;
+    m = -1; n = 93; l = 1; k = 5; i = 5;
     break;
   case 2:
-    m = -3; n = 183; l = 2;
-    a = 10; b = 103; c = 1;
+    m = -3; n = 185; l = 2; k = 5; i = 5;
     break;
   case 3:
-    m = -3; n = 92; l = 1;
-    a = 21; b = 203; c = 2;
+    m = -2; n = 92; l = 1; k = 5; i = 5;
     break;
   case 4:
-    m = -7; n = 183; l = 2;
-    a = 11; b = 102; c = 1;
+    m = -5; n = 183; l = 2; k = 5; i = 5;
     break;
   case 5:
-    m = -11; n = 183; l = 2;
-    a = 11; b = 101; c = 1;
+    m = -3; n = 91; l = 1; k = 5; i = 5;
     break;
   case 6:
-    m = -6; n = 93; l = 1;
-    a = 21; b = 195; c = 2;
+    m = -7; n = 181; l = 2; k = 5; i = 5;
+    break;
+  case -1:
+    m = -1; n = 104; l = 1; k = -1; i = -1; j = 2;
+    if(!(joy_msg.axes[1] > 0 && joy_msg.axes[1] < 0.5)){
+        m = 0; n = 0; l = 0;
+    }
     break;
   default:
     break;
   }
 
   float gas = (joy_msg.axes[2]*m+n)/l;
-  float brake = (joy_msg.axes[3]*a+b)/c;
+  float brake = (joy_msg.axes[3]*k+i)/j;
   //float gas = joy_msg.axes[2]*(-1)+93;//low
   //float gas = (joy_msg.axes[2]*-3+183)/2;//second
   //float gas = joy_msg.axes[2]*-3+92;//third
@@ -118,7 +119,11 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
   //float brake = joy_msg.axes[3]*(11)+101;//top
   //float brake = (joy_msg.axes[3]*21+195)/2;//overtop
   controller.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
-  int throttle = int((gas+brake)/2);
+  
+
+  throttle = gas+brake;
+  
+
   controller.data[1] = throttle;
   //ROS_INFO("steering:%d",steering);   // スティック0の状態を表示 (-1 ～ 1)
   //ROS_INFO("steering:%d",controller.data[0]);  // ボタン0の状態を表示 (0 or 1)
