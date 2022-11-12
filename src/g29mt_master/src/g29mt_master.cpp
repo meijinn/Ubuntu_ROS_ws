@@ -42,8 +42,8 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
   if (shift_count > 6){
     shift_count = 6;
   }
-  if (shift_count < -1){
-    shift_count = -1;
+  if (shift_count < 0){
+    shift_count = 0;
   }
 
   for (int i = 13; i <= 17; i++){

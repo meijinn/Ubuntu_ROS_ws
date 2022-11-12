@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-std_msgs::UInt8MultiArray controller;
+std_msgs::UInt8MultiArray servo;
 
 int shift_count = 0;
 int shift_state = 0;
@@ -13,7 +13,8 @@ bool clutch = false;
 char hantei[10];
 
 int m,n,l,k = 0;
-int i,j = 0;
+int i = 0;
+int j = 1;
 
 void joy_callback(const sensor_msgs::Joy &joy_msg){
 
@@ -28,6 +29,7 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
     strcpy(hantei, "NG");
   }
   
+  //MT-パドルシフトの処理
   shift_state = joy_msg.buttons[4] - joy_msg.buttons[5];
 
   if(shift_state != last_shift_state){
@@ -48,16 +50,17 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
     shift_count = -1;
   }
 
+  //MT-Hパターンの処理
   for (int i = 13; i <= 17; i++){
     if (joy_msg.buttons[12] == 1 && joy_msg.axes[1] > 0 && joy_msg.axes[1] < 0.5){
-      shift_count = 1;
-    }else if(joy_msg.buttons[i] == 1 && joy_msg.axes[1] > 0){
-        shift_count = i-11;
+      shift_count = 1;//lowギアの半クラッチの処理
+    }else if(joy_msg.buttons[i] == 1 && joy_msg.axes[1] > 0){//クラッチが踏まれててかつHパターンの入力がある。
+        shift_count = i-11;//second 2速 ~ overtop 6速までの処理
       }else if(joy_msg.buttons[18] == 1 && joy_msg.axes[1] > 0){
-        shift_count = -1;
+        shift_count = -1;//バックギアの処理
       }
     }
-
+  //ニュートラルの処理
   if(joy_msg.buttons[12] + joy_msg.buttons[13] + joy_msg.buttons[14] + joy_msg.buttons[15]
       + joy_msg.buttons[16] + joy_msg.buttons[17] + joy_msg.buttons[18] == 0 && joy_msg.axes[1] > 0){
         shift_count = 0;
@@ -94,8 +97,8 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
     m = -7; n = 181; l = 2; k = 5; i = 5;
     break;
   case -1:
-    m = -1; n = 104; l = 1; k = -1; i = -1; j = 2;
-    if(!(joy_msg.axes[1] > 0 && joy_msg.axes[1] < 0.5)){
+    m =  1; n = 103; l = 1; k = -1; i = -1; j = 2;
+    if((joy_msg.axes[1] > 0 && joy_msg.axes[1] < 0.5) || (last_shift_state == 1) && (shift_count == -1)){
         m = 0; n = 0; l = 0;
     }
     break;
@@ -118,19 +121,19 @@ void joy_callback(const sensor_msgs::Joy &joy_msg){
   //float brake = joy_msg.axes[3]*11+102;//fourth
   //float brake = joy_msg.axes[3]*(11)+101;//top
   //float brake = (joy_msg.axes[3]*21+195)/2;//overtop
-  controller.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
+  servo.data[0] = ((joy_msg.axes[0]*(-1)*180)+180)/2;
   
 
   throttle = gas+brake;
   
 
-  controller.data[1] = throttle;
+  servo.data[1] = throttle;
   //ROS_INFO("steering:%d",steering);   // スティック0の状態を表示 (-1 ～ 1)
   //ROS_INFO("steering:%d",controller.data[0]);  // ボタン0の状態を表示 (0 or 1)
   //ROS_INFO("throttle:%d",controller.data[1]);
   //ROS_INFO("shift_count:%d",shift_count);
-  printf("\rSteering:%d ",controller.data[0]);
-  printf("Throttle:%d ",controller.data[1]);
+  printf("\rSteering:%d ",servo.data[0]);
+  printf("Throttle:%d ",servo.data[1]);
   printf("Gear:%d ",shift_count);
   printf("clutch:%s    \r",hantei);
   fflush(stdout);
@@ -142,13 +145,16 @@ int main(int argc, char **argv){
   ros::NodeHandle nh;
   ros::Subscriber sub = nh.subscribe("joy", 10, joy_callback);
 
-  ros::Publisher controller_pub = nh.advertise<std_msgs::UInt8MultiArray>("controller", 1);
+  ros::Publisher controller_pub = nh.advertise<std_msgs::UInt8MultiArray>("servo", 1);
   ros::Rate loop_rate(100);
+  // ros::Publisher controller_pub = nh.advertise<std_msgs::UInt8MultiArray>("controller", 1);
+  // ros::Rate loop_rate(100);
 
   while (ros::ok())
   {
-    controller.data.resize(2);
-    controller_pub.publish(controller);
+    servo.data.resize(2);
+    //controller_pub.publish(controller);
+    controller_pub.publish(servo);
     ros::spinOnce();
     loop_rate.sleep();
   }
